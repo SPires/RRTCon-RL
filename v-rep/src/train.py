@@ -1,3 +1,4 @@
+import sys
 import os
 import numpy as np
 from proxy_env import RLBot
@@ -15,42 +16,46 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 def train():
     #Initializing model
     print 'Building Model.'
-    model_name = 'model_proxy_conf2_small_mazze_4actions.hdf5'
+    model_dir = 'model_proxy_conf2_small_mazze_4actionscp.hdf5'
+    model = load_model( model_dir )
+    model_name = os.path.basename(model_dir)
+    print 'Saved model found.'
+    """
     try:
-        model = load_model(model_name)
+        model = load_model(model_name +'.hdf5')
         
         print 'Saved model found.'
-
+    
     except:
         model = Sequential()
-        model.add(Dense(units=32, input_dim=16))
-        model.add(Activation("relu"))
-        model.add(Dense(units=16))
+        model.add(Dense(units=12, input_dim=16))
         model.add(Activation("relu"))
         model.add(Dense(units=10))
         model.add(Activation("relu"))
         model.add(Dense(units=5))
         model.add(Activation("relu"))
         model.compile(optimizer='Adam', loss='categorical_crossentropy')
+        
         print 'No model found, creating new.'
         print "Model Created"
+        
         plot_model(model, to_file=model_name +'.png', show_shapes=True, show_layer_names=True)
         print 'Model save to file:', model_name +'.png'
-        
+    """    
             
     #Initializing environment
     env = RLBot()
 
     # Set learning parameters
     y = .99
-    e = 0.1
-    num_epochs = 100
-    num_steps = 300
+    e = 0.3
+    num_epochs = 150
+    num_steps = 500
     # create lists to contain total rewards and steps per episode
     stepList = []
     rewardList = []
     lossList = []
-    SPEED = 0.8
+    SPEED = 0.7
 
     for i in range(num_epochs):
         # Reset environment and get first new observation
@@ -115,7 +120,7 @@ def train():
             e -= 0.001 #0.01
             
         else:
-            e -= 0.002 #0.002
+            e -= 0.003 #0.002
         stepList.append(j)
         rewardList.append(rAll)
         lossList.append(loss)
@@ -129,9 +134,9 @@ def train():
         if done is True:
                 break
     
-    print("Average loss: " + str(sum(lossList) / num_episodes))
-    print("Average number of steps: " + str(sum(stepList) / num_episodes))
-    print("Average reward: " + str(sum(rewardList) / num_episodes))
+    print("Average loss: " + str(sum(lossList) / num_epochs))
+    print("Average number of steps: " + str(sum(stepList) / num_epochs))
+    print("Average reward: " + str(sum(rewardList) / num_epochs))
 
     plt.plot(rewardList)
     plt.plot(stepList)
